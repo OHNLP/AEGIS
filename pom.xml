@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.ohnlp.aegis</groupId>
+    <artifactId>AEGIS-PARENT</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <description>AEGIS: A Sentinel Syndromic Surveillance Solution for Infectious Diseases</description>
+
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>AEGIS-MODELS</module>
+        <module>AEGIS-TRANSFORMERS</module>
+        <module>AEGIS-REST</module>
+    </modules>
+
+</project>
