@@ -3,10 +3,9 @@ package org.ohnlp.aegis.etl.filters;
 import de.jollyday.HolidayCalendar;
 import de.jollyday.HolidayManager;
 import de.jollyday.ManagerParameters;
-import org.ohnlp.aegis.etl.DataStruct;
+import org.ohnlp.aegis.api.DataStruct;
 
 import java.util.Calendar;
-import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
 

@@ -1,6 +1,4 @@
-package org.ohnlp.aegis.etl;
-
-import org.nd4j.linalg.api.ndarray.INDArray;
+package org.ohnlp.aegis.api;
 
 import java.util.Date;
 

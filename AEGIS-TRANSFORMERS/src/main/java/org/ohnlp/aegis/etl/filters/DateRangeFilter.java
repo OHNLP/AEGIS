@@ -1,6 +1,6 @@
 package org.ohnlp.aegis.etl.filters;
 
-import org.ohnlp.aegis.etl.DataStruct;
+import org.ohnlp.aegis.api.DataStruct;
 
 import java.util.Date;
 import java.util.List;

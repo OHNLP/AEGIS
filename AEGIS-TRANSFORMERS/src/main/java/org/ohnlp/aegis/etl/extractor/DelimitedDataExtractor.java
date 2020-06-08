@@ -1,8 +1,6 @@
 package org.ohnlp.aegis.etl.extractor;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-import org.ohnlp.aegis.etl.DataStruct;
+import org.ohnlp.aegis.api.DataStruct;
 
 import java.io.File;
 import java.io.IOException;

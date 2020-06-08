@@ -25,7 +25,6 @@
     <properties>
         <nd4j.version>1.0.0-beta7</nd4j.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <jackson.version>2.11.0</jackson.version>
     </properties>
 
     <artifactId>AEGIS-MODELS</artifactId>
@@ -54,13 +53,7 @@
         <!-- Jackson Databind -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <!-- SLF4j -->
         <dependency>

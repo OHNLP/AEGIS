@@ -2,7 +2,7 @@ package org.ohnlp.aegis.etl.transform;
 
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
-import org.ohnlp.aegis.etl.DataStruct;
+import org.ohnlp.aegis.api.DataStruct;
 
 import java.util.stream.Stream;
 

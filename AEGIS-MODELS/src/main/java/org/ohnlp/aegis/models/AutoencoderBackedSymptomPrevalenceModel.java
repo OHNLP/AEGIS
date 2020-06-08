@@ -1,5 +1,6 @@
 package org.ohnlp.aegis.models;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.deeplearning4j.earlystopping.EarlyStoppingConfiguration;
@@ -26,6 +27,7 @@ import org.nd4j.linalg.learning.config.AdaGrad;
 import org.nd4j.linalg.learning.config.IUpdater;
 import org.nd4j.linalg.learning.config.Sgd;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
+import org.ohnlp.aegis.api.AEGISModel;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,12 +39,11 @@ import java.util.Random;
 /**
  * A stacked autoencoder model using symptom-prevalence distributions to perform aberration detection
  */
-public class AutoencoderBackedSymptomPrevalenceModel {
+public class AutoencoderBackedSymptomPrevalenceModel implements AEGISModel {
     private HyperParameters parameters;
     private ModelScore scores;
     private NormalizerMinMaxScaler normalizer;
     private MultiLayerNetwork model;
-    private File modelDirectory;
 
     /**
      * Creates a new stacked autoencoder model instance trained on the supplied dataset with the listed layer dimensions
@@ -53,28 +54,21 @@ public class AutoencoderBackedSymptomPrevalenceModel {
      * @return A trained model instance that is also saved to the supplied model directory
      * @throws IOException if an error occurs during the serialization process
      */
-    public static AutoencoderBackedSymptomPrevalenceModel newModelFittedOnData(File modelDirectory, DataSet data, int... dims) throws IOException {
-        AutoencoderBackedSymptomPrevalenceModel ret = new AutoencoderBackedSymptomPrevalenceModel(modelDirectory);
-        ret.fit(data, dims);
-        ret.serialize();
-        return ret;
+    public AutoencoderBackedSymptomPrevalenceModel initModelFittedOnData(File modelDirectory, DataSet data, int... dims) throws IOException {
+        this.initializeAndFit(data, dims);
+        this.serialize(modelDirectory);
+        return this;
     }
 
     /**
-     * Loads a previously saved model (via {@link #serialize()})
+     * Loads a previously saved model (via {@link #serialize(File)})
      * @param modelDirectory The directory in which the model is saved
      * @return The loaded stacked autoencoder model
      * @throws IOException If an error occurs during model load
      */
-    public static AutoencoderBackedSymptomPrevalenceModel loadModel(File modelDirectory) throws IOException {
-        AutoencoderBackedSymptomPrevalenceModel ret = new AutoencoderBackedSymptomPrevalenceModel(modelDirectory);
-        ret.load();
-        return ret;
-    }
-
-
-    private AutoencoderBackedSymptomPrevalenceModel(File modelDirectory) {
-        this.modelDirectory = modelDirectory;
+    public AutoencoderBackedSymptomPrevalenceModel deserialize(File modelDirectory) throws IOException {
+        load(modelDirectory);
+        return this;
     }
 
     /**
@@ -82,6 +76,7 @@ public class AutoencoderBackedSymptomPrevalenceModel {
      * @param data The data to score, unnormalized
      * @return The model score
      */
+    @Override
     public double score(DataSet data) {
         this.normalizer.transform(data);
         return this.model.score(data);
@@ -94,13 +89,31 @@ public class AutoencoderBackedSymptomPrevalenceModel {
         return this.scores.getMean() + (this.scores.stdDev * 2);
     }
 
+
+    @Override
+    public AEGISModel initializeAndFit(File modelDirectory, DataSet dataSet, JsonNode modelConfig) throws IOException {
+        if (!modelConfig.has("dims")) {
+            throw new IllegalArgumentException("A dimension parameter of encoder dimension sizes is required");
+        }
+        List<Integer> dims = new LinkedList<>();
+        for (JsonNode dim : modelConfig.get("dims")) {
+            try {
+                dims.add(dim.asInt());
+            } catch (Throwable t) {
+                throw new IOException(t);
+            }
+        }
+        return initializeAndFit(dataSet, dims.stream().mapToInt(i -> i).toArray());
+    }
+
+
     /**
      * Fits the model on an initial dataset
      * @param dataset The dataset
      * @param dims The encoder layer sizes
      * @return This object, which is updated to reflect the trained model
      */
-    public AutoencoderBackedSymptomPrevalenceModel fit(DataSet dataset, int... dims) {
+    private AutoencoderBackedSymptomPrevalenceModel initializeAndFit(DataSet dataset, int... dims) throws IOException {
         // Set up a normalizer
         this.normalizer = new NormalizerMinMaxScaler(-1, 1);
         this.normalizer.fit(dataset);
@@ -213,10 +226,11 @@ public class AutoencoderBackedSymptomPrevalenceModel {
 
 
     /**
-     * Serializes the model into {@link #modelDirectory}
+     * Serializes the model into a specific directory
+     * @param modelDirectory A directory to save the model to
      */
-    public void serialize() throws IOException {
-        if (!modelDirectory.isDirectory() || (!modelDirectory.exists() && !modelDirectory.mkdirs())) {
+    public void serialize(File modelDirectory) throws IOException {
+        if (modelDirectory == null || !modelDirectory.isDirectory() || (!modelDirectory.exists() && !modelDirectory.mkdirs())) {
             throw new IOException("Could not create defined model directory, check it is somewhere writable and does not already exist as a file");
         }
         ObjectWriter ow = new ObjectMapper().writerWithDefaultPrettyPrinter();
@@ -225,13 +239,13 @@ public class AutoencoderBackedSymptomPrevalenceModel {
         ModelSerializer.writeModel(model, new File(modelDirectory, "model.bin"), true);
         NormalizerSerializer normalizerSerializer = new NormalizerSerializer();
         normalizerSerializer.write(normalizer, new File(modelDirectory, "normalizer.bin"));
-
     }
 
     /**
-     * Loads the model from {@link #modelDirectory}
+     * Loads the model from a specific directory
+     * @param modelDirectory A directory to load the model from
      */
-    private void load() throws IOException {
+    private void load(File modelDirectory) throws IOException {
         ObjectMapper om = new ObjectMapper();
         this.parameters = om.readValue(new File(modelDirectory, "hyperparameters.json"), HyperParameters.class);
         this.scores = om.readValue(new File(modelDirectory, "modelstatistics.json"), ModelScore.class);
@@ -374,7 +388,4 @@ public class AutoencoderBackedSymptomPrevalenceModel {
         return model;
     }
 
-    public File getModelDirectory() {
-        return modelDirectory;
-    }
 }
