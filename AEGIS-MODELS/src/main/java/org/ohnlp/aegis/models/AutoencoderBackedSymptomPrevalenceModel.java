@@ -230,7 +230,7 @@ public class AutoencoderBackedSymptomPrevalenceModel implements AEGISModel {
      * @param modelDirectory A directory to save the model to
      */
     public void serialize(File modelDirectory) throws IOException {
-        if (modelDirectory == null || !modelDirectory.isDirectory() || (!modelDirectory.exists() && !modelDirectory.mkdirs())) {
+        if (modelDirectory == null || (!modelDirectory.exists() && !modelDirectory.mkdirs()) || !modelDirectory.isDirectory()) {
             throw new IOException("Could not create defined model directory, check it is somewhere writable and does not already exist as a file");
         }
         ObjectWriter ow = new ObjectMapper().writerWithDefaultPrettyPrinter();
